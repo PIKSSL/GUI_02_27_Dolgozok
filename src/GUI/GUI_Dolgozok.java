@@ -214,7 +214,6 @@ public class GUI_Dolgozok extends javax.swing.JFrame {
                 .addContainerGap(41, Short.MAX_VALUE))
         );
 
-        jCheckBox1.setSelected(true);
         jCheckBox1.setText("Mindkettő nem");
         jCheckBox1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
