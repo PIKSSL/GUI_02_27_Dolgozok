@@ -4,6 +4,13 @@
  */
 package GUI;
 
+import GUI.Model.DolgozoModel;
+import java.io.IOException;
+
+import java.util.Objects;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  *
  * @author gyorgy.krisztian
@@ -13,8 +20,19 @@ public class GUI_Dolgozok extends javax.swing.JFrame {
     /**
      * Creates new form GUI_Dolgozok
      */
-    public GUI_Dolgozok() {
+    private DolgozoModel dolgozoModel;
+    private String[] adatok;  //aktualis kivalasztott
+    private String mentettOsszesites;
+    private String aktualisNem;
+
+    public GUI_Dolgozok() throws IOException {
         initComponents();
+        ini();
+    }
+
+    private void ini() throws IOException {
+        dolgozoModel = new DolgozoModel("emberek.txt");
+        dolgozokFeltolt();
     }
 
     /**
@@ -59,13 +77,31 @@ public class GUI_Dolgozok extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "elso n", "masodik n", " " }));
+        jComboBox1.setSelectedIndex(-1);
+        jComboBox1.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jComboBox1ItemStateChanged(evt);
+            }
+        });
+        jComboBox1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jComboBox1ActionPerformed(evt);
+            }
+        });
 
         jLabel1.setText("Lányok");
 
         jLabel2.setText("Fiúk");
 
-        jComboBox2.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        jComboBox2.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "elso f", "masodik f" }));
+        jComboBox2.setSelectedIndex(-1);
+        jComboBox2.setToolTipText("");
+        jComboBox2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jComboBox2ActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -254,16 +290,82 @@ public class GUI_Dolgozok extends javax.swing.JFrame {
     }//GEN-LAST:event_jCheckBox1ActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:
+        mentettOsszesites = "";
+        if (jCheckBox1.isSelected()) {
+            osszesit("F", true);
+            osszesit("L", true);
+        } else {
+            osszesit(aktualisNem, true);
+        }
+        try {
+            dolgozoModel.mentes(mentettOsszesites);
+        } catch (IOException ex) {
+            Logger.getLogger(GUI_Dolgozok.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jRadioButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButton1ActionPerformed
-        // TODO add your handling code here:
+        osszesit("L", false);
+        aktualisNem = "L";
     }//GEN-LAST:event_jRadioButton1ActionPerformed
 
     private void jRadioButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButton2ActionPerformed
-        // TODO add your handling code here:
+        osszesit("F", false);
+        aktualisNem = "F";
     }//GEN-LAST:event_jRadioButton2ActionPerformed
+
+    private void jComboBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox1ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jComboBox1ActionPerformed
+
+    private void jComboBox1ItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBox1ItemStateChanged
+        if (!Objects.isNull(jComboBox1.getSelectedItem())) {
+            adatKiir(jComboBox1.getSelectedIndex());
+            System.out.println(jComboBox1.getSelectedIndex());
+            jComboBox2.setSelectedItem(null);
+
+        }
+    }//GEN-LAST:event_jComboBox1ItemStateChanged
+
+    private void jComboBox2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox2ActionPerformed
+        if (!Objects.isNull(jComboBox2.getSelectedItem())) {
+            adatKiir(jComboBox2.getSelectedIndex() + jComboBox1.getComponentCount());
+            jComboBox1.setSelectedItem(null);
+            System.out.println(jComboBox2.getSelectedIndex());
+        }
+    }//GEN-LAST:event_jComboBox2ActionPerformed
+
+    private void osszesit(String nem, boolean mentes) {
+        String[] osszesito = dolgozoModel.osszesites(nem);
+        if (mentes) {
+            mentettOsszesites += (nem.equals("F") ? "\nFiúk" : "\nLányok") + "\nlegidősebb: " + osszesito[0] + "\nösszes kor: " + osszesito[1] + "\n6 éve dolgozó: " + osszesito[2];
+        } else {
+            jLabel3.setText("legidősebb: " + osszesito[0]);
+            jLabel4.setText("összes kor: " + osszesito[1]);
+            jLabel5.setText("6 éve dolgozó: " + osszesito[2]);
+        }
+    }
+
+    private void adatKiir(int index) {
+
+        adatok = dolgozoModel.aktualis(index);
+        jLabel6.setText("kor: " + adatok[1]);
+        jLabel7.setText("mióta dolgozik: " + (adatok.length > 3 ? adatok[3] : "nem tudjuk"));
+    }
+
+    private void dolgozokFeltolt() {
+        jComboBox1.removeAllItems();
+        jComboBox2.removeAllItems();
+        jComboBox1.addItem(null);
+        jComboBox2.addItem(null);
+        for (String[] dolgozo : dolgozoModel.getDolgozok()) {
+            if (dolgozo[2].equals("F")) {
+                jComboBox2.addItem(dolgozo[0]);
+            } else if (dolgozo[2].equals("L")) {
+                jComboBox1.addItem(dolgozo[0]);
+            }
+        }
+    }
 
     /**
      * @param args the command line arguments
@@ -295,7 +397,11 @@ public class GUI_Dolgozok extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new GUI_Dolgozok().setVisible(true);
+                try {
+                    new GUI_Dolgozok().setVisible(true);
+                } catch (IOException ex) {
+                    Logger.getLogger(GUI_Dolgozok.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         });
     }

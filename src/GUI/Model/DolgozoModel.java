@@ -1,7 +1,8 @@
 
 package GUI.Model;
 
-import java.awt.List;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -22,17 +23,54 @@ public class DolgozoModel {
         ArrayList<String> adatok = new ArrayList<>();
         adatok = (ArrayList<String>) Files.readAllLines(utvonal);
         adatok.remove(0);
+        dolgozok.clear();
         for (String string : adatok) {
             String[] szeparalt = string.split(separator);
             dolgozok.add(szeparalt);
-            for (String string1 : szeparalt) {
-                System.out.println(string1);
+        }
+    }
+
+    public ArrayList<String[]> getDolgozok() {
+        return dolgozok;
+    }
+    
+    public String[] osszesites(String nem){
+        String[] osszesito = new String[3];
+        int legidosebb=0;
+        int osszKor=0;
+        String hatEveDolgozo = "nincs";
+        for (String[] dolgozo : dolgozok) {
+            if(dolgozo[2].equals(nem)){
+                if(Integer.parseInt(dolgozo[1]) > legidosebb){
+                    legidosebb = Integer.parseInt(dolgozo[1]);
+                }
+                osszKor += Integer.parseInt(dolgozo[1]);
+                if(dolgozo.length > 3){
+                    if(Integer.parseInt(dolgozo[3])>6){
+                        hatEveDolgozo = dolgozo[0];
+                    }
+                }
             }
         }
-        
-        
-        
+        osszesito[0]=legidosebb+"";
+        osszesito[1]=osszKor+"";
+        osszesito[2]=hatEveDolgozo;
+        return osszesito;
     }
+    
+    public String[] aktualis(int index){
+        return dolgozok.get(index);
+    }
+    
+    public void mentes(String adat) throws IOException{
+        File mentes = new File("emberekMentes.txt");
+        FileWriter fw = new FileWriter("emberekMentes.txt");
+        fw.write(adat);
+        System.out.println("MENT");
+        fw.close();
+    }
+    
+
     
     
 }
